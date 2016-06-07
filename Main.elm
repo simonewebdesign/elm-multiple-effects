@@ -2,10 +2,11 @@
 import Signal exposing (Address, Mailbox)
 import Task exposing (Task)
 import Html exposing (..)
-import Html.Attributes exposing (..)
+--import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import StartApp
 import Effects exposing (Effects, Never)
+import Alerts
 
 
 app : StartApp.App Model
@@ -28,6 +29,7 @@ main =
 type alias Model =
   { counter1 : Int
   , counter2 : Int
+  , alerts : Alerts.Model
   }
 
 
@@ -35,6 +37,7 @@ initialModel : Model
 initialModel =
   { counter1 = 1
   , counter2 = 2
+  , alerts = Alerts.init
   }
 
 
@@ -45,6 +48,8 @@ type Action
   | IncrementCounter1
   | IncrementCounter2
   | PerformEffect
+  | AlertsAction Alerts.Action
+  --| CreateAlert
 
 
 update : Action -> Model -> ( Model, Effects Action )
@@ -62,18 +67,28 @@ update action model =
       ( { model | counter2 = model.counter2 + 1 }, Effects.none )
 
     PerformEffect ->
-      ( model, anEffect )
+      ( model
+      , Effects.batch
+          [ Task.succeed ()
+            |> Effects.task
+            |> Effects.map (always IncrementCounter1)
+          , Task.succeed ()
+            |> Effects.task
+            |> Effects.map (always IncrementCounter2)
+          ]
+      )
 
-
-anEffect =
-  Effects.batch
-    [ Task.succeed ()
-      |> Effects.task
-      |> Effects.map (always IncrementCounter1)
-    , Task.succeed ()
-      |> Effects.task
-      |> Effects.map (always IncrementCounter2)
-    ]
+    AlertsAction subAction ->
+      let
+        (newAlerts, effects) =
+          Alerts.update subAction model.alerts
+      in
+        ( { model | alerts = newAlerts }
+        , Effects.map AlertsAction effects
+        )
+      --( { model | alerts = Alerts.update subAction model.alerts }
+      --, Effects.none
+      --)
 
 
 -- VIEW
@@ -81,11 +96,17 @@ anEffect =
 view : Address Action -> Model -> Html
 view address model =
   div []
-    [
-      text <| toString model
-    , button
-        [ onClick address PerformEffect ]
-        [ text "Perform the increment Effect" ]
+    [ div [] [ text <| toString model ]
+    , div []
+        [ button
+            [ onClick address PerformEffect ]
+            [ text "Perform the increment Effect" ]
+        ]
+    , div []
+        [ button []
+            --[ onClick address CreateAlert ]
+            [ text "Click to create an alert" ]
+        ]
     ]
 
 
