@@ -6,8 +6,10 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import StartApp
 import Effects exposing (Effects, Never)
-import Alerts
-
+import Alerts exposing (..)
+import Alert exposing (..)
+--import Alerts exposing (Action(..))
+--import Alert exposing (Alert, Kind(..))
 
 app : StartApp.App Model
 app =
@@ -47,9 +49,8 @@ type Action
   = NoOp
   | IncrementCounter1
   | IncrementCounter2
-  | PerformEffect
+  | IncrementBoth
   | AlertsAction Alerts.Action
-  --| CreateAlert
 
 
 update : Action -> Model -> ( Model, Effects Action )
@@ -66,7 +67,7 @@ update action model =
     IncrementCounter2 ->
       ( { model | counter2 = model.counter2 + 1 }, Effects.none )
 
-    PerformEffect ->
+    IncrementBoth ->
       ( model
       , Effects.batch
           [ Task.succeed ()
@@ -77,6 +78,16 @@ update action model =
             |> Effects.map (always IncrementCounter2)
           ]
       )
+
+    --CreateAlert ->
+    --  ( model
+    --  , Task.succeed ()
+    --    |> Effects.task
+    --    |> Effects.map (\_ ->
+    --          AlertsAction Alerts.Add Alert.initialModel
+    --    )
+    --  )
+
 
     AlertsAction subAction ->
       let
@@ -99,12 +110,12 @@ view address model =
     [ div [] [ text <| toString model ]
     , div []
         [ button
-            [ onClick address PerformEffect ]
-            [ text "Perform the increment Effect" ]
+            [ onClick address IncrementBoth ]
+            [ text "Increment both" ]
         ]
     , div []
         [ button []
-            --[ onClick address CreateAlert ]
+            [ onClick address (AlertsAction Alerts.Add Alert.initialModel) ]
             [ text "Click to create an alert" ]
         ]
     ]
