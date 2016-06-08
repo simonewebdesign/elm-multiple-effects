@@ -2,14 +2,12 @@
 import Signal exposing (Address, Mailbox)
 import Task exposing (Task)
 import Html exposing (..)
---import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import StartApp
 import Effects exposing (Effects, Never)
 import Alerts exposing (..)
 import Alert exposing (..)
---import Alerts exposing (Action(..))
---import Alert exposing (Alert, Kind(..))
+
 
 app : StartApp.App Model
 app =
