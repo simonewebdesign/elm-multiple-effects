@@ -1,11 +1,11 @@
-module Alerts
-  (alert, alertText, alertSuccess, alertInfo, alertWarning, alertError
-  , init
-  , Model
-  , view
-  , Action
-  , update
-  ) where
+module Alerts where
+  --(alert, alertText, alertSuccess, alertInfo, alertWarning, alertError
+  --, init
+  --, Model
+  --, view
+  --, Action
+  --, update
+  --) where
 
 {-| This module provides utility functions for displaying alert notifications
 to the user. Check out the Public API section to see what's on offer.
@@ -34,6 +34,7 @@ import Alert exposing (Kind (..))
 import Dict exposing (Dict)
 import Maybe
 import Effects exposing (Effects)
+import Task exposing (Task)
 
 
 -- PUBLIC API
@@ -124,6 +125,7 @@ init =
 type Action
   = Add Alert.Model
   | Modify ID Alert.Action
+  --| Remove ID
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -131,7 +133,9 @@ update action model =
   case action of
     Add newAlert ->
       ( model |> add newAlert
-      , Effects.none
+      , Task.succeed model.nextID
+        |> Effects.task
+        |> Effects.map (\id -> Modify id Alert.ScheduleDismission)
       )
 
     Modify id alertAction ->
@@ -142,25 +146,13 @@ update action model =
 
         (updatedAlert, effects) =
           Alert.update alertAction currentAlert
-
-        --updateAlert alert =
-        --  case alert of
-        --    Just anAlert ->
-        --      (updatedAlert, effects) =
-        --        Alert.update 
-        --    Nothing ->
-        --      Alert.initialModel
-
-        --(updatedAlert, effects) =
-        --  Al§rt.update
-        --    alertAction
-        --    (Dict.get id model.alerts
-        --    |> Maybe.withDefault Alert.initialModel
-        --    )
       in
         ( { model | alerts = Dict.update id (\_ -> Just updatedAlert) model.alerts }
-        , Effects.none --Effects.map (Modify id) effects
+        , Effects.map (Modify id) effects
         )
+
+    --Remove id ->
+
 
 
 -- VIEW

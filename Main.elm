@@ -79,16 +79,6 @@ update action model =
           ]
       )
 
-    --CreateAlert ->
-    --  ( model
-    --  , Task.succeed ()
-    --    |> Effects.task
-    --    |> Effects.map (\_ ->
-    --          AlertsAction Alerts.Add Alert.initialModel
-    --    )
-    --  )
-
-
     AlertsAction subAction ->
       let
         (newAlerts, effects) =
@@ -97,9 +87,6 @@ update action model =
         ( { model | alerts = newAlerts }
         , Effects.map AlertsAction effects
         )
-      --( { model | alerts = Alerts.update subAction model.alerts }
-      --, Effects.none
-      --)
 
 
 -- VIEW
@@ -114,10 +101,11 @@ view address model =
             [ text "Increment both" ]
         ]
     , div []
-        [ button []
-            [ onClick address (AlertsAction Alerts.Add Alert.initialModel) ]
-            [ text "Click to create an alert" ]
+        [ button
+            [ onClick address <| AlertsAction <| Alerts.Add Alert.initialModel ]
+            [ text "Add alert" ]
         ]
+    , Alerts.view (Signal.forwardTo address AlertsAction) model.alerts
     ]
 
 

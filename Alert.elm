@@ -1,12 +1,12 @@
-module Alert
-  ( Alert
-  , Model
-  , initialModel
-  , Action
-  , update
-  , view
-  , Kind(..)
-  ) where
+module Alert where
+  --( Alert
+  --, Model
+  --, initialModel
+  --, Action
+  --, update
+  --, view
+  --, Kind(..)
+  --) where
 
 import Signal exposing (Address)
 import Html exposing (..)
